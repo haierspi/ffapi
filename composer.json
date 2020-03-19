@@ -1,0 +1,17 @@
+{
+    "require": {
+        "endroid/qr-code": "^3.2",
+        "illuminate/database": "*",
+        "illuminate/events": "^6.0",
+        "erusev/parsedown": "^1.7",
+        "symfony/var-dumper": "^4.3",
+        "aws/aws-sdk-php": "^3.112",
+        "facebook/graph-sdk": "^5.7",
+        "facebook/php-business-sdk": "^5.0",
+        "codeitnowin/barcode": "^3.0",
+        "phpoffice/phpspreadsheet": "^1.10",
+        "alibabacloud/sdk": "^1.8"
+    },
+    "repositories": {
+    }
+}

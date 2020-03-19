@@ -1,0 +1,187 @@
+#!/usr/bin/env php
+<?php
+
+/*
+
+//终端控制
+$j = 0;
+while ( $j++ < 10) {
+    //system("clear");
+    
+    printf(($j == 1 ?'':"\033[1A\033[32m\033[40m")."这是第%d次输出------\n这是第次输出------", $j);
+    printf("\r");
+    sleep(3);
+    
+}
+
+//环境变量配置
+vi /etc/profile
+
+export PROJECT_ENV="production"
+export PROJECT_ENV="development"
+
+source   /etc/profile 
+
+echo '<pre>';
+var_dump(getenv('PROJECT_ENV') );
+echo '</pre>';
+exit;
+
+*/
+
+date_default_timezone_set('Asia/Shanghai');
+
+define('ENV',getenv('PROJECT_ENV')?getenv('PROJECT_ENV'):'production');
+
+define('BASEDIR', dirname(__DIR__));
+
+
+define('LOGSDIR', BASEDIR.'/logs');
+
+if ( !phpversion('swoole') || version_compare(phpversion('swoole'), '1.10.5', '!=')) {
+
+    //die("Swoole extension version\e[31m must = 1.10.5\e[0m\n");
+    
+}
+
+require BASEDIR.'/Config/Autoload.php';
+
+function serverStop()
+{
+    $Conf = require(BASEDIR.'/Config/'.ENV.'/ServerConf.php');
+
+    $pidFile = $Conf['setArr']['pid_file'];
+    
+    if (file_exists($pidFile)) {
+
+        $pid = file_get_contents($pidFile);
+
+        if (!swoole_process::kill($pid, 0)) {
+
+            echo "PID :{$pid} not exist \n";
+
+            return false;
+        }
+
+        swoole_process::kill($pid);
+
+        $time = time();
+
+        $flag = false;
+
+        while (true) {
+
+            usleep(1000);
+            
+            if (!swoole_process::kill($pid, 0)) {
+                echo "server stop at " . date("y-m-d h:i:s") . "\n";
+                if (is_file($pidFile)) {
+                    unlink($pidFile);
+                }
+                $flag = true;
+                break;
+            } else {
+                if (time() - $time > 10) {
+                    echo "stop server fail\n";
+                    break;
+                }
+            }
+        }
+        return $flag;
+    } else {
+        echo "PID file does not exist!\n";
+        return false;
+    }
+}
+
+function serverReload()
+{
+    $Conf = require(BASEDIR.'/Config/'.ENV.'/ServerConf.php');
+
+    $pidFile = $Conf['setArr']['pid_file'];
+    
+    if (file_exists($pidFile)) {
+
+        $pid = file_get_contents($pidFile);
+
+        if (!swoole_process::kill($pid, 0)) {
+            echo "pid :{$pid} not exist \n";
+            return;
+        }
+
+        swoole_process::kill($pid, SIGUSR1);
+
+        echo 'api server reload at ' . date("y-m-d h:i:s") . "\n";
+
+    } else {
+
+    	serverStart();
+
+        echo 'PID file does not exist, api server start at '.date("y-m-d h:i:s")."\n";
+
+    }
+}
+
+function serverRestart()
+{
+   serverStop();
+   serverStart();
+}
+
+function serverStart() {
+
+    // 获取网卡地址
+    $swoole_ip = swoole_get_local_ip();
+
+
+    if( empty($swoole_ip['eth1']) ) {
+
+        $out_ip = '106.14.147.83';
+        
+    } else {
+
+        $out_ip = $swoole_ip['eth1'];
+    }
+
+    $conf = require(BASEDIR.'/Config/'.ENV.'/ServerConf.php');
+    
+    $worker_num = $conf['setArr']['worker_num'];
+
+	define('SERVER_ADDR', $out_ip );
+
+    define('LOCAL_ADDR', $swoole_ip['eth0'] );
+
+    define('WORKER_NUM', $worker_num);
+
+    if( file_exists(LOGSDIR.'/server.log') ) {
+
+        copy(LOGSDIR.'/server.log',LOGSDIR.'/env_log/'.date('Ymd_his').'.log');
+        @unlink(LOGSDIR.'/server.log');
+    }
+
+    echo 'server start at '.date("y-m-d h:i:s")."\n";
+
+
+	\App\Swoole\ServerMange::getInstance()->start();
+
+}
+
+$command = null;
+
+if (!empty($_SERVER['argv']) && isset($_SERVER['argv'][1])) {
+
+    $command = $_SERVER['argv'][1];
+}
+
+
+switch ($command) {
+    case 'stop':
+        serverStop();
+        break;
+    case 'restart':
+        serverRestart();
+        break;
+    default:
+        serverReload();
+}
+?>

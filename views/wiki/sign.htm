@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>$title</title>
+    <base href="$baseurl" />
+    <!-- 新 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="static/bootstrap3.3.0/css/bootstrap.min.css">
+    <!-- 可选的Bootstrap主题文件（一般不用引入） -->
+    <link rel="stylesheet" href="static/bootstrap3.3.0/css/bootstrap-theme.min.css">
+    <script src="static/js/jquery-1.12.4.min.js"></script>
+    <script src="static/js/sea.js" type="text/javascript"></script>
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="static/bootstrap3.3.0/js/bootstrap.min.js"></script>
+
+    <script src="static/jquery-jsonview-master/dist/jquery.jsonview.min.js"></script>
+    <link href="static/jquery-jsonview-master/dist/jquery.jsonview.min.css" rel="stylesheet" >
+  </head>
+  <body>
+
+
+
+
+  <div class="container-fluid">
+    <p>
+      <div class="list-group websockettype">
+        <li  class="list-group-item disabled">一、组装待签名字符串</li>
+        <li  class="list-group-item">
+          <b>1）筛选 </b> 接口中要剔除sign_type、sign个参数。存在空值的参数必须剔除。
+        </li>
+        <li  class="list-group-item">
+          <b>2）排序 </b> 在参数集合中，根据参数（不是参数对应的值）的第一个字符的键值ASCII码递增排序，如果遇到相同字符则按照第二个字符的键值ASCII码递增排序，以此类推。
+        </li>
+        <li  class="list-group-item">
+          <b>3）拼接 </b> 在参数集合中，把每个参数及其值组合成“参数=参数值”的格式，并且把这些参数用&字符连接起来,获得 string1 (参值字符串);
+        </li>
+        <li  class="list-group-item disabled">二、调用签名函数计算签名</li>
+        <li  class="list-group-item">
+          <b>1）拼接密钥 </b> 把密钥字符（Key）拼接在 string1 尾部, 得到 string2 (待签字符串)
+        </li>
+        <li  class="list-group-item">
+          <b>2）计算签名 </b> 调用md5加密函数，对 string2 做加密运算, 得到 signstring 签名结果。
+        </li>
+        <li  class="list-group-item disabled">三、签名结果的用途</li>
+        <li  class="list-group-item">
+          得到的签名结果也是一串字符串，这串字符串便是sign参数的值，把这串字符串赋值于sign参数。<br>
+
+          GET方式签名用户直接放到URL内:<br>
+
+          http://api.xxx.com/xxx/info?ids=242737,251211&amp;sign_timestamp=1476435013&amp;<span style="color:red">sign=57f612dc8495667f278ab14afdbe57e6</span><br>
+
+          POST方式直接放到 post json 内<br>
+
+          值得注意的是 组装GET 接口API的请求URL时...需要URL内的参数值进行URLENCODE,但是在计算签名过程中不能对参数值进行URLENCODE
+
+        </li>
+        <li  class="list-group-item disabled">四、签名时效的问题</li>
+        <li  class="list-group-item">
+          部分接口需要 附带 请求时间戳sign_timestamp 参数 ,用于控制签名时效; 各个接口由于业务的不同会有不同的签名时效规则… 比如: user/info 接口时效期 为 60s
+        </li>
+
+      </div>
+    </p>
+  </div>
+
+
+
+  </body>
+</html>

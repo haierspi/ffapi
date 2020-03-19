@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+		<meta name="format-detection" content="telephone=no" />
+		<base href="/" />
+		<title></title>
+		<link rel="stylesheet" href="css/CommonReset.css" />
+		<link rel="stylesheet" href="css/element-ui.css" />
+		<link rel="stylesheet" href="css/page.css" />
+		<script type="text/javascript" src="comJs/vue.min.js"></script>
+		<script type="text/javascript" src="comJs/element-ui.js"></script>
+		<script type="text/javascript" src="comJs/vue-resource.js"></script>
+	</head>
+
+	<body>
+		<div id="page" class="page" v-cloak>
+			<el-steps :active="showpageNum-1" align-center v-if="showpageNum!=5">
+			  <el-step title="Enter order number"></el-step>
+			  <el-step title="Order confirmation"></el-step>
+			  <el-step title="Survey details"></el-step>
+			  <el-step title="Complete"></el-step>
+			</el-steps>	
+			<page1-components v-if="showpageNum==1" @pageparams="monitor"></page1-components>
+			<page5-components v-if="showpageNum==5" @pageparams="monitor" :email="email"></page5-components>
+			<page2-components v-if="showpageNum==2" @pageparams="monitor" :email="email" :ordersn="ordersn"></page2-components>
+			<page3-components v-if="showpageNum==3" @pageparams="monitor" :selalllist="selalllist" ref="page3"></page3-components>
+			<page4-components v-if="showpageNum==4" @pageparams="monitor"></page4-components>
+			<div class="btnBox" v-if="showpageNum==2||showpageNum==3||showpageNum==5">
+				<div class="btn fl" @click="btnFun1">Back</div>
+				<div class="btn fr active" @click="btnFun2">Next step</div>
+			</div>
+		</div>
+		<script type="text/javascript" src="js/page.js"></script>
+	</body>
+
+</html>

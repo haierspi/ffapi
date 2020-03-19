@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>$title</title>
+    <base href="$_G['siteurl']" />
+    <!-- 新 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="static/bootstrap3.3.0/css/bootstrap.min.css">
+    <!-- 可选的Bootstrap主题文件（一般不用引入） -->
+    <link rel="stylesheet" href="static/bootstrap3.3.0/css/bootstrap-theme.min.css">
+    <script src="static/js/jquery-1.12.4.min.js"></script>
+    <script src="static/js/sea.js" type="text/javascript"></script>
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="static/bootstrap3.3.0/js/bootstrap.min.js"></script>
+    <script src="static/jquery-jsonview-master/dist/jquery.jsonview.min.js"></script>
+    <link href="static/jquery-jsonview-master/dist/jquery.jsonview.min.css" rel="stylesheet" >
+    <script src="static/js/socket.io-1.4.5.js"></script>
+
+
+  </head>
+  <body>
+
+  <style type="text/css">
+  .wscode{
+    overflow-y: hidden;
+    word-break: break-all;
+    height:25px; text-overflow:ellipsis;
+  }
+  .showcodetable{
+    margin:0px;
+  }
+
+
+  </style>
+    <script>
+
+      function displaywscode(_this,format){
+
+        var wscode = $(_this).parents('tr').find('.wscode').html();
+        wscodeobj = JSON.parse(wscode);
+
+        seajs.use(['/static/artDialog/src/dialog'], function (dialog) {
+          var d = dialog({
+            content: '\
+              <table class="showcodetable table table-bordered table-striped table-info list-group-item-info">\
+                <tbody>\
+                   <tr><td   valign="middle" >Code'+(format?' Format':'')+':</td></tr>\
+                  <tr><td   valign="middle" class="showcode">● $wskey</td></tr>\
+                </tbody>\
+              </table>',
+            width: 800,
+            height: 80,
+            padding: 10,
+            quickClose: true,
+            onshow: function () {
+              if (format) {
+                $('.showcode').JSONView(wscodeobj);
+              }else{
+                $('.showcode').html(wscode);
+              }
+              this.height($('.showcodetable').height()+2);
+              this.reset(); 
+            }
+          }).show(_this);
+        });
+      }
+
+      function socketecho(type,data,wsinfo){
+        var DateObj = new Date();
+        var DateString = DateObj.getFullYear()
+        +'-'+("0"+DateObj.getMonth()+1).slice(-2)
+        +'-'+("0"+DateObj.getDate()).slice(-2)
+        +' '+("0"+DateObj.getHours()).slice(-2)
+        +':'+("0"+DateObj.getMinutes()).slice(-2)
+        +':'+("0"+DateObj.getSeconds()).slice(-2);
+
+        var datajson = JSON.stringify(data);
+
+        if (wsinfo) {
+            $('#socketecho_body').append('\
+                <tr><td style="font-weight:bold;">'+type+'</td><td>'+DateString+'</td><td ><div class="wscode">'+datajson+'</div></td><td><B>'+wsinfo.serid+'</B> / '+wsinfo.host+':'+wsinfo.port+' [WS]</td><td>'+(datajson!='""'?'<button onclick="displaywscode(this,0)">View Code</button> <button onclick="displaywscode(this,1)">Code Format</button>':'')+'</td></tr>\
+            ');
+        }else{
+          $('#socketecho_body').append('\
+                <tr><td style="font-weight:bold;">'+type+'</td><td>'+DateString+'</td><td ><div class="wscode">'+datajson+'</div></td><td>SHOW_API</td><td>'+(datajson!='""'?'<button onclick="displaywscode(this,0)">View Code</button> <button onclick="displaywscode(this,1)">Code Format</button>':'')+'</td></tr>\
+            ');
+        }
+
+       
+      }
+
+      function wsconnect(host,port,serid,logindata){
+        var wsinfo = {};
+        wsinfo.host = host;
+        wsinfo.port = port;
+        wsinfo.serid = serid;
+        
+        var socket = io('http://'+wsinfo.host+':'+wsinfo.port);
+        socket.on('connect', function () {
+          socketecho('connect','',wsinfo);
+          socket.emit('login',logindata);
+          socketecho('login','',wsinfo)
+          var img = "static/image/start.png";
+          $('.server_serid_'+wsinfo.serid).children('img').attr('src',img);
+          $('.server_serid_'+wsinfo.serid).children('span').html('连通中');
+        });
+        {loop $websockettype $key $value}
+        socket.on('$key', function (data) {
+            socketecho('$key',data,wsinfo)
+        });
+        {/loop}
+      }
+
+      var timestamp = parseInt(Date.now()/1000);
+      $.getJSON('room/comein.toolcg?roomid=$roomid&timestamp='+timestamp+'&sign=_AUTOSIGN_', function(data){
+        socketecho('API->Comein->GetData',data);
+        var uid = data.memberdata_room.uid?data.memberdata_room.uid:0;
+        console.log({roomid:data.roomdata.roomid,uid:uid,auth:data.roomauth});
+        {loop $messageservers $key $value}
+          {if $value['status'] }wsconnect('{$value['host']}','{$value['port']}',$key,{roomid:data.roomdata.roomid,uid:uid,auth:data.roomauth});{/if}
+        {/loop}
+      });
+
+
+
+
+
+
+
+
+    </script>
+    
+
+    <div class="container-fluid">
+      <p >
+        <table class="table table-bordered table-striped table-info list-group-item-info tablefont">
+          <tbody  id="">
+            
+            <tr><td colspan="6" valign="middle">● 消息服务器列表</td></tr>
+            <tr><td width="10%">服务器ID</td><td width="10%">服务器HOST</td><td width="10%">服务器端口</td><td width="10%">服务状态</td><td width="10%">连接状态</td><td width="60%"></td></tr>
+            {loop $messageservers $key $server}
+            <tr><td>$server[serid]</td><td>$server[host]</td><td>$server[port]</td><td>{$opts[$server[status]]}</td><td class="server_serid_{$server[serid]}"><img src="static/image/stop.png" style="max-height:25px;max-width:25px;    vertical-align: text-top;"/><span>失败</span></td><td></td></tr>
+            {/loop}
+            
+          </tbody>
+        </table>
+        <table class="table table-bordered table-striped table-info list-group-item-info tablefont">
+          <tbody  id="socketecho_body">
+            <tr><td colspan="6" valign="middle">● 消息监听工具 / 房间:
+            <select onchange="window.location='wiki/wsdemo?roomid='+this.value;">
+            <!--{loop $rooms $room}-->
+            <option value="$room[roomid]" {if $roomid == $room[roomid]}selected{/if}> [ {$room[roomid]} ] $room[title] </option>
+            <!--{/loop}-->
+            </select> - 消息列表
+            </td></tr>
+            <tr><td width="15%">消息类型</td><td width="10%">时间</td><td  width="40%">Code</td><td width="15%">Server</td><td width="20%">工具</td></tr>
+          </tbody>
+        </table>
+      </p>
+    </div>
+
+
+
+
+
+  </body>
+</html>

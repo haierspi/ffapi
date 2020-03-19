@@ -1,0 +1,77 @@
+<!--{if !$_GET['inajax']}-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>$data[name][title] {$this->MAPATH}</title>
+  <base href="$baseurl" />
+  <!-- 新 Bootstrap 核心 CSS 文件 -->
+  <link rel="stylesheet" href="static/bootstrap3.3.0/css/bootstrap.min.css">
+  <!-- 可选的Bootstrap主题文件（一般不用引入） -->
+  <link rel="stylesheet" href="static/bootstrap3.3.0/css/bootstrap-theme.min.css">
+  <script src="static/js/jquery-1.12.4.min.js"></script>
+  <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+  <script src="static/bootstrap3.3.0/js/bootstrap.min.js"></script>
+  <script src="static/jquery-jsonview-master/dist/jquery.jsonview.min.js"></script>
+  <link href="static/jquery-jsonview-master/dist/jquery.jsonview.min.css" rel="stylesheet">
+</head>
+
+<body>
+  <!--{/if}-->
+  <div class="container-fluid responsecontent">
+    
+    <p style="    padding: 5px 0px;">
+      <!--{if !$display}-->
+      <!--{loop $displayerrors $key $error}-->
+      <table class="table table-bordered table-striped table-info list-group-item-info">
+        <tbody>
+          <tr>
+            <td colspan="3" valign="middle">● $error[title]</td>
+          </tr>
+          <tr>
+            <td width="30%">错误代码</td>
+            <td width="70%">错误描述</td>
+          </tr>
+          <!--{loop $error[data] $key $value}-->
+          <tr>
+            <td style="font-weight:bold;">$key</td>
+            <td>$value</td>
+          </tr>
+          <!--{/loop}-->
+        </tbody>
+      </table>
+      <!--{/loop}-->
+      <!--{else}-->
+      <table class="table table-bordered table-striped table-info list-group-item-info">
+        <tbody>
+          <tr>
+            <td colspan="3" valign="middle">● 当前接口返回错误列表
+              <span style="float:right">
+                <a href="/wiki/error">查看全部错误列表</a>
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td width="10%">错误代码</td>
+            <td width="50%">错误描述</td>
+            <td width="531px">错误级别</td>
+          </tr>
+          <!--{loop $displayerrors $code $value}-->
+          <tr>
+            <td style="font-weight:bold;">$code</td>
+            <td>$value[error]</td>
+            <td width="531px">$value[leveltitle]</td>
+          </tr>
+          <!--{/loop}-->
+        </tbody>
+      </table>
+      <!--{/if}-->
+    </p>
+    
+  </div>
+  <!--{if !$_GET['inajax']}-->
+</body>
+
+</html>
+<!--{/if}-->
