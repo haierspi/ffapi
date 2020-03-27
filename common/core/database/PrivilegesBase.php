@@ -1,5 +1,6 @@
 <?php
 namespace ff\database;
+use ff\code\ErrorCode;
 
 class PrivilegesBase
 {
@@ -127,7 +128,7 @@ class PrivilegesBase
         $id = md5($permKey);
 
         if (isset($this->allPermission[$id]) && !$this->userPermission[$id]) {
-            return ['code' => -1012];
+            return ErrorCode::NO_PERMISSION_ACCESS();
         }
         return null;
     }

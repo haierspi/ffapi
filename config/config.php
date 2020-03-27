@@ -22,6 +22,7 @@ define('RUNTIME_ENVIROMENT', getenv('RUNTIME_ENVIROMENT') ? getenv('RUNTIME_ENVI
 define('SYSTEM_DEBUG', E_ALL & ~E_NOTICE);
 //开启系统错误日志收集; 日志路径 runtime/log/debug_errorexception.log
 define('SYSTEM_DEBUG_ERRORLOG', 1);
+define('SYSTEM_CODE_MSG_DISPLAY', 1);
 //开启SQL DEBUG
 define('SYSTEM_DEBUG_SQLLOG', 0);
 
@@ -52,22 +53,36 @@ $config = [
             'heartbeat_idle_time' => 30,
         ],
     ],
-    'kuaidi100'=>[
-        'key'       => '',
-        'customer'  => '',
-        'secret'    => '',
-        'salt'      => '',//自己定义回调salt
+    'kuaidi100' => [
+        'key' => '',
+        'customer' => '',
+        'secret' => '',
+        'salt' => '', //自己定义回调salt
     ],
     //亚马逊
-    'aws' => [
-        'access_key_id' => '',
-        'secret_access_key' => '',
-        's3' => [
-            'bucket' => '',
-            'region' => '',
+    'upload'=>[
+        'class'=>'ff\upload\AWS',
+        'AWS' => [
+            'access_key_id' => '',
+            'secret_access_key' => '',
+            's3' => [
+                'bucket' => 's3',
+                'region' => 'ap-southeast-1',
+            ],
         ],
     ],
 
+    //邮件
+    'mail'=>[
+        'class'=>'ff\mail\AlibabaCloudDM',
+        'AlibabaCloudDM' => [
+            'access_key_id' => '',
+            'secret_access_key' => '',
+            'withAccountName' => '',
+            'withFromAlias' => '',
+            'regionId' =>'cn-hangzhou'
+        ],
+    ],
     'signkey' => 'FFAPI_DEV_AUTHENTICATION',
     'encryptkey' => 'FFAPI_DEV_AUTHENTICATION',
     //开启token
@@ -89,6 +104,13 @@ $config = [
         'jsonp' => 'ff\response\jsonp',
         'xml' => 'ff\helpers\xmlParser',
     ],
+    'code' => [
+        'ff\code\ErrorCode',
+        'ff\code\SussedCode',
+        'common\ErrorCode',
+        'common\SussedCode',
+    ],
+
     //开启wiki
     'wiki' => [
         'enable' => true,
@@ -112,14 +134,6 @@ $config = [
             'config' => [
                 'default' => 'master',
                 'master' => [
-                    'host' => 'localhost',
-                    'port' => '7698',
-                    'username' => 'sa',
-                    'password' => '',
-                    'database' => '',
-                    'prefix' => '',
-                ],
-                'online' => [
                     'host' => 'localhost',
                     'port' => '7698',
                     'username' => 'sa',
@@ -158,14 +172,6 @@ $config = [
                     'options' => [],
                 ],
 
-                'fbadauto' => [
-                    'dsn' => 'mysql:host=localhost;dbname=dev_fbadauto;charset=utf8mb4;',
-                    'username' => '',
-                    'password' => '',
-                    'tablepre' => '',
-                    'options' => [],
-                ],
-
             ],
         ],
     ],
@@ -173,96 +179,12 @@ $config = [
 
 //生产环境
 if (constant('RUNTIME_ENVIROMENT') == 'PRODUCTION') {
-    $config['components']['db'] = [
-        'class' => 'ff\database\Connection',
-        'config' => [
-            'default' => 'master',
-            'master' => [
-                'dsn' => 'mysql:host=localhost;dbname=product_center_online;charset=UTF8;',
-                'username' => '',
-                'password' => '',
-                'tablepre' => 'ly_',
-                'options' => [],
-            ],
-            'fbadauto' => [
-                'dsn' => 'mysql:host=localhost;dbname=fbadauto;charset=utf8mb4;',
-                'username' => '',
-                'password' => '',
-                'tablepre' => 'ly_',
-                'options' => [],
-            ],
-        ],
-    ];
-    $config['components']['sqlsrv'] = [
-        'class' => 'ff\database\sqlsrvConnection',
-        'config' => [
-            'default' => 'master',
-            'master' => [
-                'host' => 'localhost',
-                'port' => '7698',
-                'username' => 'sa',
-                'password' => '',
-                'database' => '',
-                'prefix' => '',
-            ],
-        ],
-    ];
-    $config['components']['redis'] = [
-        'class' => 'ff\nosql\redis',
-        'config' => [
-            'default' => 'master',
-            'master' => [
-                'server' => 'localhost',
-                'port' => 6379,
-                'pconnect' => 1,
-                'connect_timeout' => 0,
-                'password' => '',
-                'db' => 0,
-                'prefix' => '',
-            ],
-        ],
-    ];
+
 }
 
 //开发测试服务器配置信息
 if (constant('RUNTIME_ENVIROMENT') == 'TESTING') {
-    $config['components']['db'] = [
-        'class' => 'ff\database\Connection',
-        'config' => [
-            'default' => 'master',
-            'master' => [
-                'dsn' => 'mysql:host=localhost;dbname=branches;charset=UTF8;',
-                'username' => '',
-                'password' => '',
-                'tablepre' => 'ly_',
-                'options' => [],
-            ],
-            'fbadauto' => [
-                'dsn' => 'mysql:host=localhost;dbname=fbadauto;charset=utf8mb4;',
-                'username' => '',
-                'password' => '',
-                'tablepre' => 'ly_',
-                'options' => [],
-            ],
-        ],
-    ];
 
-    $config['components']['redis'] = [
-        'class' => 'ff\nosql\redis',
-        'config' => [
-            'default' => 'master',
-            'master' => [
-                'server' => 'localhost',
-                'port' => 6379,
-                'pconnect' => 1,
-                'connect_timeout' => 0,
-                'password' => '',
-                'db' => 1,
-                'prefix' => '',
-            ],
-        ],
-    ];
 }
-
 
 return $config;

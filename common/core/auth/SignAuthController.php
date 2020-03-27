@@ -6,6 +6,7 @@ use ff\base\Application;
 use ff\base\Controller;
 use ff\helpers\StringLib;
 use ff\network\Request;
+use ff\code\ErrorCode;
 
 class SignAuthController extends Controller
 {
@@ -26,7 +27,7 @@ class SignAuthController extends Controller
         $signkey = ff::$config['signkey'];
 
         if (!isset($vars['sign']) || $vars['sign'] != StringLib::getArySign($vars, $signkey)) {
-            return ['code' => -1003];
+            return ErrorCode::SIGN_FAILED();
         }
         if (!is_null($callrunController)) {
             $runController->sign = $this->sign;

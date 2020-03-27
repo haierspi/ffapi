@@ -2,6 +2,8 @@
 namespace controllers\v1_0;
 
 use Aws\S3\S3Client;
+use common\ErrorCode;
+use common\SussedCode;
 use DB;
 use ff;
 use ff\auth\TokenAuthController;
@@ -13,7 +15,7 @@ use models\v1_0\omsUser;
  *
  */
 
-class MyController extends TokenAuthController
+class myController extends TokenAuthController
 {
 
     /**
@@ -36,7 +38,9 @@ class MyController extends TokenAuthController
         $omsUserModel = new omsUser();
         list($userData) = $omsUserModel->getUserByField($this->user->uid, 'id');
 
-        return ['code' => 1, 'userData' => $userData];
+        return SussedCode::SUSSED([
+            'userData' => $userData,
+        ]);
 
     }
 
@@ -64,49 +68,28 @@ class MyController extends TokenAuthController
         $file = $this->request->fileVars['file'];
 
         if (empty($type) || empty($file)) {
-            return ['code' => -1010]; //缺少参数
+            return ErrorCode::MISSING_PARAMETER(); //缺少参数
         }
 
         if (!preg_match('/^[\w]*$/is', $type)) {
-            return ['code' => -1011]; //参数错误
+            return ErrorCode::PARAMETER_ERROR(); //参数错误
         }
         //获取文件类型
-        $mimeTypes = require SYSTEM_ROOT_PATH . '/data/mimeTypes.php';
+
         //获取上传文件后缀名
         $fileExt = substr($file['name'], strrpos($file['name'], '.') + 1);
 
         $fileContent = file_get_contents($file['tmp_name']);
 
-        $s3Client = new S3Client([
-            'region' => ff::$config['aws']['s3']['region'],
-            //'region' => 'us-east-1',
-            'version' => '2006-03-01',
-            'credentials' => [
-                'key' => ff::$config['aws']['access_key_id'],
-                'secret' => ff::$config['aws']['secret_access_key'],
-            ],
-        ]);
+        $upload = new \ff\upload\Manager();
 
-        $bucket = ff::$config['aws']['s3']['bucket'];
+        $fileURL = $upload->uploadByFile(
+            $file['tmp_name'], $file['name'], 'file_export'
+        );
 
-        //获取文件名
-        $fileKey = strtolower($type) . '/' . date('Y-m-d') . '/' . uniqid() . '.' . $fileExt;
+        $bucket = $upload->getBucket();
 
-        try {
-            $result = $s3Client->putObject([
-                'Bucket' => $bucket,
-                'Key' => $fileKey,
-                'Body' => $fileContent,
-                'ContentType' => $mimeTypes[$fileExt],
-                'ACL' => 'public-read',
-            ]);
-        } catch (\InvalidArgumentException $e) {
-            return ['code' => 0, 'msg' => 'InvalidArgumentException', 'error' => $e->getMessage()];
-        } catch (\Aws\S3\Exception\S3Exception $e) {
-            return ['code' => 0, 'msg' => 'S3Exception', 'error' => $e->getMessage()];
-        }
-
-        $fileURL = $result->get('ObjectURL');
+        $fileMimeType = $upload->getFileMimeType();
 
         $data = [
             'name' => $file['name'],
@@ -115,7 +98,7 @@ class MyController extends TokenAuthController
             'provider' => 'aws_s3',
             'bucket' => $bucket,
             'type' => strtolower($type),
-            'mimeType' => $mimeTypes[$fileExt],
+            'mimeType' => $fileMimeType,
             'url' => $fileURL,
             'uid' => $this->user->uid,
             'ip' => $this->request->clientip,
@@ -124,7 +107,9 @@ class MyController extends TokenAuthController
 
         $data['fileId'] = DB::table('file_upload')->insertGetId($data);
 
-        return ['code' => 1, 'fileId' => $data['fileId'], 'fileData' => $data, 'fileURL' => $fileURL];
+        return SussedCode::SUSSED([
+            'fileId' => $data['fileId'], 'fileData' => $data, 'fileURL' => $fileURL,
+        ]);
 
     }
 

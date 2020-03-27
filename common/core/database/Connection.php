@@ -37,9 +37,11 @@ class Connection extends Component
         foreach ($config as $ck => $cv) {
             $name = $this->default_key == $ck ? 'default' : $ck;
             $this->capsule->addConnection($this->parseConfig($cv), $name);
-            if (defined('SYSTEM_DEBUG_SQLLOG')) {
+            if (defined('SYSTEM_DEBUG_SQLLOG') && constant('SYSTEM_DEBUG_SQLLOG') == 1) {
                 //enable debug log
                 $this->capsule->getConnection($name)->enableQueryLog();
+            }else{
+                $this->capsule->getConnection($name)->disableQueryLog();
             }
         }
         $this->capsule->setEventDispatcher(new Dispatcher(new Container));

@@ -6,6 +6,7 @@ use ff\base\Controller;
 use ff\database\UserModel;
 use ff\helpers\TokenParse;
 use ff\network\Request;
+use ff\code\ErrorCode;
 
 class TokenAuthController extends Controller
 {
@@ -29,16 +30,16 @@ class TokenAuthController extends Controller
         $token = $token ?? null;
 
         if (!isset($token)) {
-            return ['code' => -1005];
+            return ErrorCode::NOT_LOGGED();
         }
         list($uid, $nickname, $expiration) = TokenParse::get($token);
 
         if (empty($uid)) {
-            return ['code' => -1006];
+            return ErrorCode::TOKEN_FAILED();
         }
 
         if (!$expiration || $expiration < TIMESTAMP) {
-            return ['code' => -1007];
+            return ErrorCode::TOKEN_EXPIRED();
         }
 
         return $this->init($uid, $token);
@@ -51,7 +52,7 @@ class TokenAuthController extends Controller
         $this->user->init($uid, $token);
 
         if (is_null($this->user) || !$this->user->uid) {
-            return ['code' => -1006];
+            return ErrorCode::TOKEN_FAILED();
         }
 
         return null;

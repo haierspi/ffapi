@@ -2,6 +2,7 @@
 namespace ff\auth;
 
 use ff\database\UserSuppliersModel;
+use ff\code\ErrorCode;
 
 
 class TokenAuthSuppliersController extends TokenAuthController
@@ -12,7 +13,7 @@ class TokenAuthSuppliersController extends TokenAuthController
         $this->user = $userModel->init($uid, $token);
 
         if (!$this->user->uid) {
-            return ['code' => -1006];
+            return ErrorCode::TOKEN_FAILED();
         }
 
         return null;

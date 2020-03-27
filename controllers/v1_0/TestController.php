@@ -5,6 +5,8 @@ use AlibabaCloud\Client\AlibabaCloud;
 use AlibabaCloud\Client\Exception\ClientException;
 use AlibabaCloud\Client\Exception\ServerException;
 use AlibabaCloud\Ecs\Ecs;
+use common\ErrorCode;
+use common\SussedCode;
 use ff;
 use ff\auth\TokenAuthController;
 use ff\base\Controller;
@@ -13,6 +15,9 @@ use ff\database\Model;
 use ff\database\Schema;
 use ff\database\UserModel;
 use ff\nosql\redis;
+use models\v1_0\TestModel2;
+use models\v1_0\TestModel;
+use models\v1_0\testSqlsrv;
 
 /**
  *
@@ -20,7 +25,7 @@ use ff\nosql\redis;
  *
  */
 
-class TestController extends Controller
+class testController extends Controller
 {
     /**
      *
@@ -85,6 +90,57 @@ class TestController extends Controller
         $RUNTIME_ENVIROMENT = constant('RUNTIME_ENVIROMENT');
         return ['code' => 1, 'RUNTIME_ENVIROMENT' => $RUNTIME_ENVIROMENT];
     }
+
+    /**
+     * @name CLI下判断任务是否正在执行
+     * @method POST
+     * @format JSON
+     * @param  string  title yes 商品名称
+     * @param  string  page no 显示页数 默认显示第一页
+     * @param  string  pagenum no 每页显示数量  默认每页显示10个
+     * @var int code 状态码(成功1 ;失败0)
+     * @var string msg 状态信息
+     * @var array_object goodses 商品列表
+     * @other
+     * @example
+     * [GET][SUCCESS]JSON:
+     *
+     * @author Wind-dust
+     *
+     */
+
+    public function actionOneTaskOneTime($method = 'GET|CLI')
+    {
+
+        //在控制器内判断当前控制器是否有一个任务正在执行中
+        if (\ff\os\System::progressIsExistsByControllerAction()) {
+            // do
+        }
+        //指定某一个控制器是否有一个任务正在执行中
+        if (\ff\os\System::progressIsExists('v1.0/ScmDIService/DIGoodsSkuAnalys')) {
+            // do
+        }
+
+        /*
+
+    progressIsExistsByControllerAction 和 progressIsExists  后面的参数 设置是否包含自身..
+
+     */
+
+    }
+
+    public function actionErrorCode($method = 'GET|CLI')
+    {
+
+        echo '<pre>';
+        var_dump(ErrorCode::ACCESS_DENIED(['do' => 'yes']));
+        echo '</pre>';
+        exit;
+
+        return ErrorCode::ACCESS_DENIED(['do' => 'yes']);
+
+    }
+
     /**
      * @name 测试REDIS
      * @method GET
@@ -205,7 +261,6 @@ class TestController extends Controller
 
     }
 
-    
     /**
      * @name 获取数据库字段
      * @method GET
@@ -222,7 +277,7 @@ class TestController extends Controller
 
     public function actionDBSchema($method = 'GET')
     {
-        $columns =  \ff\database\Schema::getColumnListing('users');
+        $columns = \ff\database\Schema::getColumnListing('users');
         dd($columns);
 
     }
@@ -262,7 +317,7 @@ class TestController extends Controller
         $s3Client = new \Aws\S3\S3Client([
             'region' => ff::$config['aws']['s3']['region'],
             //'region' => 'us-east-1',
-             'version' => '2006-03-01',
+            'version' => '2006-03-01',
             'credentials' => [
                 'key' => ff::$config['aws']['access_key_id'],
                 'secret' => ff::$config['aws']['secret_access_key'],
@@ -317,7 +372,7 @@ class TestController extends Controller
 
         AlibabaCloud::accessKeyClient(
             'LTAI4Fv9b2EZbHbwkAFoYGGA', //ACCESS_KEY_ID
-             'C0xUZTbQhU8HW4UWwrQLJAClRP7tsg' //ACCESS_KEY_SECRET
+            'C0xUZTbQhU8HW4UWwrQLJAClRP7tsg' //ACCESS_KEY_SECRET
         )
             ->regionId('cn-hangzhou')
             ->asDefaultClient();

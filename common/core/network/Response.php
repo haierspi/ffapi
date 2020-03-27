@@ -3,6 +3,7 @@ namespace ff\network;
 
 use ff;
 use ff\base\Exception;
+use ff\code\BaseCode;
 
 class Response
 {
@@ -112,26 +113,6 @@ class Response
 
     }
 
-    public function varsCodeParse()
-    {
-        if (!isset($this->outVars['code'])) {
-            return;
-        }
-        $statusCode = $this->outVars['code'];
-        if (isset($this->httpStatuses[$statusCode])) {
-            header("HTTP/1.1 {$statusCode} {$this->httpStatuses[$statusCode]}");
-        } else {
-            $codeErrors = require SYSTEM_ROOT_PATH . '/data/error.php';
-
-            $this->outVars['code'] = (int) $this->outVars['code'];
-            $code = $this->outVars['code'];
-
-            if (isset($codeErrors['code'][$code])) {
-                $this->outVars['msg'] = $codeErrors['code'][$code];
-            }
-        }
-    }
-
     public function outFormat()
     {
         if (is_string($this->outVars)) {
@@ -184,9 +165,11 @@ class Response
     private function output()
     {
         if (is_array($this->outVars)) {
-            $this->apiheader();
-            $this->varsCodeParse();
 
+            BaseCode::header($this);
+            
+            $this->apiheader();
+            
             $this->varsresponse();
             $this->varsTime();
         }

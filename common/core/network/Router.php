@@ -5,6 +5,8 @@ use ff;
 use ff\base\Controller;
 use ff\base\Exception;
 use ReflectionMethod;
+use ff\code\SussedCode;
+use ff\code\ErrorCode;
 
 class Router
 {
@@ -96,7 +98,7 @@ class Router
         $runControllerfile = constant('SYSTEM_CONTROLLERS_PATH') . "/" . ($this->_VERSION ? $this->_PATHVERSION . '/' : '') . $this->_CONTROLLER . 'Controller.php';
 
         if (!class_exists($runControllerName) && !file_exists($runControllerfile)) {
-            return $this->response(['code' => -1001]);
+            return $this->response(ErrorCode::ACCESS_DENIED());
         }
 
         $runController = ff::createObject($runControllerName, [$this->request]);
@@ -116,7 +118,7 @@ class Router
         }
 
         if (!method_exists($runController, $runAction) || !$runController instanceof Controller) {
-            return $this->response(['code' => -1001]);
+            return $this->response(ErrorCode::ACCESS_DENIED());
         }
 
         $actionReflection = new ReflectionMethod($runControllerName, $runAction);
@@ -221,7 +223,7 @@ class Router
 
                     exit();
                 } else if (!in_array($this->request->method, $ParamDefaultValue['method'])) {
-                    return $this->response(['code' => -1002]); // Request Method Error
+                    return $this->response(ErrorCode::METHOD_NOT_ALLOWED()); // Request Method Error
                 } else {
                     $callFunctionParamValue[$methodkey] = $this->request->method;
                 }

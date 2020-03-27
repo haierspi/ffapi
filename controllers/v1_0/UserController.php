@@ -68,7 +68,11 @@ class UserController extends Controller
 
         $userData['token'] = $token;
 
-        return ['code' => 1, 'msg' => '登陆成功', 'token' => $token, 'userData' => $userData];
+        return SussedCode::SUSSED([
+            'token' => $token, 'userData' => $userData
+        ]);
+
+
     }
 
     /**
@@ -174,7 +178,10 @@ class UserController extends Controller
 
         }
 
-        return ['code' => 1, 'msg' => '登陆成功', 'token' => $token, 'memberdata' => $member];
+        return SussedCode::SUSSED([
+            'token' => $token, 'memberdata' => $member
+        ]);
+
     }
 
     /**
@@ -243,12 +250,17 @@ class UserController extends Controller
         if ($type == 1) {
             //发送短信
             $response = aliyunsms::sendSecurityCode($account, $code);
-            return ['code' => 1, 'msg' => '验证码已经发送到您的手机上', 'response' => $response];
+
+            return SussedCode::SUSSED([
+                'msg' => '验证码已经发送到您的手机上', 'response' => $response
+            ]);
         }
         //验证邮箱
         elseif ($type == 2) {
             //邮箱发送邮件
-            return ['code' => 1, 'msg' => '验证码已经发送到您邮箱中'];
+            return SussedCode::SUSSED([
+                'msg' => '验证码已经发送到您邮箱中'
+            ]);
         }
 
     }
@@ -273,7 +285,9 @@ class UserController extends Controller
         $memberdata = $Member->createGuest();
         $token = $Member->getToken($memberdata['uid']);
 
-        return ['code' => 1, 'msg' => '登陆成功', 'token' => $token, 'memberdata' => $memberdata];
+        return SussedCode::SUSSED([
+            'token' => $token, 'memberdata' => $memberdata
+        ]);
     }
 
     /**
@@ -302,7 +316,9 @@ class UserController extends Controller
 
         $token = $Member->delToken($user->uid);
 
-        return ['code' => 1, 'msg' => '登陆删除Token成功'];
+        return SussedCode::SUSSED([
+            'token' => $token, 'memberdata' => $memberdata, 'wxmemberdata' => $wxmemberdata
+        ]);
 
     }
 
@@ -421,8 +437,9 @@ class UserController extends Controller
             $token = $Member->getToken($memberdata['uid']);
         }
 
-        return ['code' => 1, 'msg' => '登陆成功', 'token' => $token, 'memberdata' => $memberdata, 'wxmemberdata' => $wxmemberdata];
-
+        return SussedCode::SUSSED([
+            'token' => $token, 'memberdata' => $memberdata, 'wxmemberdata' => $wxmemberdata
+        ]);
     }
 
     /**
@@ -449,7 +466,10 @@ class UserController extends Controller
 
         $wxcallurl = $WeixinStd->buil_callurl($loginurl);
 
-        return ['code' => 1, 'wxcallurl' => $wxcallurl];
+
+        return SussedCode::SUSSED([
+            'wxcallurl' => $wxcallurl
+        ]);
 
     }
 
