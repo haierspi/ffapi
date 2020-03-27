@@ -103,6 +103,7 @@ class ComposerStaticInitaf0e22cf0e437b562bd0ab3635ff401f
             'Symfony\\Component\\VarDumper\\' => 28,
             'Symfony\\Component\\Translation\\' => 30,
             'Symfony\\Component\\PropertyAccess\\' => 33,
+            'Symfony\\Component\\Process\\' => 26,
             'Symfony\\Component\\OptionsResolver\\' => 34,
             'Symfony\\Component\\Mime\\' => 23,
             'Symfony\\Component\\Inflector\\' => 28,
@@ -212,6 +213,10 @@ class ComposerStaticInitaf0e22cf0e437b562bd0ab3635ff401f
         'Symfony\\Component\\PropertyAccess\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/property-access',
+        ),
+        'Symfony\\Component\\Process\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/process',
         ),
         'Symfony\\Component\\OptionsResolver\\' => 
         array (

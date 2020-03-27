@@ -10,7 +10,8 @@
         "facebook/php-business-sdk": "^5.0",
         "codeitnowin/barcode": "^3.0",
         "phpoffice/phpspreadsheet": "^1.10",
-        "alibabacloud/sdk": "^1.8"
+        "alibabacloud/sdk": "^1.8",
+        "symfony/process": "^4.4"
     },
     "repositories": {
     }
