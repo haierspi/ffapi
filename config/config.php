@@ -32,6 +32,9 @@ $config = [
     'ENV_HOST' => 'complaint.lwhs.me',
     'ENV_PROTOCOL' => 'http',
 
+    //前端强制跨域
+    'CLIENT_FORCE_CROSS_DOMAIN' => '',
+
     //启用服务设置
     'service' => [
         //服务器IP
@@ -60,8 +63,8 @@ $config = [
         'salt' => '', //自己定义回调salt
     ],
     //亚马逊
-    'upload'=>[
-        'class'=>'ff\upload\AWS',
+    'upload' => [
+        'class' => 'ff\upload\AWS',
         'AWS' => [
             'access_key_id' => '',
             'secret_access_key' => '',
@@ -73,14 +76,14 @@ $config = [
     ],
 
     //邮件
-    'mail'=>[
-        'class'=>'ff\mail\AlibabaCloudDM',
+    'mail' => [
+        'class' => 'ff\mail\AlibabaCloudDM',
         'AlibabaCloudDM' => [
             'access_key_id' => '',
             'secret_access_key' => '',
             'withAccountName' => '',
             'withFromAlias' => '',
-            'regionId' =>'cn-hangzhou'
+            'regionId' => 'cn-hangzhou',
         ],
     ],
     'signkey' => 'FFAPI_DEV_AUTHENTICATION',

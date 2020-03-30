@@ -4,9 +4,9 @@ namespace ff\network;
 use ff;
 use ff\base\Controller;
 use ff\base\Exception;
-use ReflectionMethod;
-use ff\code\SussedCode;
 use ff\code\ErrorCode;
+use ff\code\SussedCode;
+use ReflectionMethod;
 
 class Router
 {
@@ -158,11 +158,9 @@ class Router
 
                     $authCallController = ff::createObject("ff\\auth\\" . $authClassName . 'AuthController', [$this->request]);
                     $authCallResult = $authCallController->beforeAction();
-                    
+
                     $runController->authController = $authCallController;
 
-
-                    
                     if (!is_null($authCallResult)) {
                         return $this->response($authCallResult);
                     }
@@ -210,25 +208,26 @@ class Router
                     $this->response->header("Access-Control-Allow-Headers", 'Origin, X-Requested-With, Token, Content-Type, Accept, Authorization');
                     $this->response->header('Access-Control-Allow-Methods', join(',', $ParamDefaultValue['method']));
 
-                    if (isset($this->request->vars['domain'])) {
-                        if (preg_match('/^http|https:\/\//is', $this->request->vars['domain'])) {
-                            $domain = $this->request->vars['domain'];
+                    if (isset($this->request->vars['domain']) || !empty(ff::$config['CLIENT_FORCE_CROSS_DOMAIN'])) {
+                        $domainVar = empty(ff::$config['CLIENT_FORCE_CROSS_DOMAIN']) ? $this->request->vars['domain'] : ff::$config['CLIENT_FORCE_CROSS_DOMAIN'];
+                        if (preg_match('/^http|https:\/\//is', $domainVar)) {
+                            $domain = $domainVar;
                         } else {
-                            $domain = 'http://' . $this->request->vars['domain'];
+                            $domain = 'http://' . $domainVar;
                         }
                         $this->response->header('Access-Control-Allow-Origin', $domain);
                     } else {
                         $this->response->header('Access-Control-Allow-Origin', '*');
                     }
-
                     exit();
+                    
                 } else if (!in_array($this->request->method, $ParamDefaultValue['method'])) {
                     return $this->response(ErrorCode::METHOD_NOT_ALLOWED()); // Request Method Error
                 } else {
                     $callFunctionParamValue[$methodkey] = $this->request->method;
                 }
             }
-        }else{
+        } else {
             if ($this->request->method == 'OPTIONS') {
 
                 $allMethods = [
@@ -239,11 +238,12 @@ class Router
                 $this->response->header("Access-Control-Allow-Headers", 'Origin, X-Requested-With, Token, Content-Type, Accept, Authorization');
                 $this->response->header('Access-Control-Allow-Methods', join(',', $allMethods));
 
-                if (isset($this->request->vars['domain'])) {
-                    if (preg_match('/^http|https:\/\//is', $this->request->vars['domain'])) {
-                        $domain = $this->request->vars['domain'];
+                if (isset($this->request->vars['domain']) || !empty(ff::$config['CLIENT_FORCE_CROSS_DOMAIN'])) {
+                    $domainVar = empty(ff::$config['CLIENT_FORCE_CROSS_DOMAIN']) ? $this->request->vars['domain'] : ff::$config['CLIENT_FORCE_CROSS_DOMAIN'];
+                    if (preg_match('/^http|https:\/\//is', $domainVar)) {
+                        $domain = $domainVar;
                     } else {
-                        $domain = 'http://' . $this->request->vars['domain'];
+                        $domain = 'http://' . $domainVar;
                     }
                     $this->response->header('Access-Control-Allow-Origin', $domain);
                 } else {
